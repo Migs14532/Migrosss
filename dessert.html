@@ -23,7 +23,7 @@
     }
 
     .back-arrow {
-      font-size: 24px;
+      font-size: 30px;
       cursor: pointer;
       margin-bottom: 10px;
     }
@@ -77,20 +77,44 @@
       border-radius: 5px;
     }
 
-    .view-order {
+    button.increase {
+      background-color: green;
+      color: white;
+    }
+
+    button.decrease {
+      background-color: red;
+      color: white;
+    }
+
+    .button-group {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
       margin-top: 20px;
-      width: 100%;
+    }
+
+    .button-group button {
+      flex: 1;
       padding: 10px;
-      background-color: #FAD59A;
-      color: black;
+      font-size: 16px;
       border: none;
       border-radius: 8px;
-      font-size: 16px;
       cursor: pointer;
     }
 
-    .view-order:hover {
+    .view-order {
       background-color: #FAD59A;
+      color: black;
+    }
+
+    .proceed-order {
+      background-color: #4CAF50;
+      color: white;
+    }
+
+    .proceed-order:hover {
+      background-color: #45a049;
     }
 
     button.increase {
@@ -163,7 +187,10 @@
     </div>
   </div>
 
-  <button class="view-order">View Order</button>
+  <div class="button-group">
+    <button class="view-order">View Order</button>
+    <button class="proceed-order">Proceed to Order Summary</button>
+  </div>
 </div>
 
 <script>
@@ -187,27 +214,57 @@
     });
   });
 
-  document.querySelector('.view-order').addEventListener('click', () => {
-    let summary = "Your Order:\n";
-    let total = 0;
-
+  function gatherOrderItems() {
+    const order = [];
     desserts.forEach(dessert => {
       const name = dessert.dataset.name;
       const qty = parseInt(dessert.querySelector('.quantity').textContent);
       const price = parseInt(dessert.querySelector('.price').textContent.replace('₱', ''));
       if (qty > 0) {
-        summary += `${name} x${qty} = ₱${qty * price}\n`;
-        total += qty * price;
+        order.push({ name, qty, price });
       }
     });
+    return order;
+  }
 
-    if (total > 0) {
+  document.querySelector('.view-order').addEventListener('click', () => {
+    const items = gatherOrderItems();
+    if (items.length > 0) {
+      let summary = "Your Order:\n";
+      let total = 0;
+      items.forEach(item => {
+        const subtotal = item.qty * item.price;
+        summary += `${item.name} x${item.qty} = ₱${subtotal}\n`;
+        total += subtotal;
+      });
       summary += `\nTotal: ₱${total}`;
       alert(summary);
     } else {
       alert("You haven't selected any dessert yet.");
     }
   });
+
+  document.querySelector('.proceed-order').addEventListener('click', () => {
+  const items = gatherOrderItems();
+  if (items.length > 0) {
+    const existing = JSON.parse(localStorage.getItem('orderItems')) || [];
+
+    items.forEach(newItem => {
+      const existingItem = existing.find(item => item.name === newItem.name);
+      if (existingItem) {
+        existingItem.qty += newItem.qty;
+      } else {
+        existing.push(newItem);
+      }
+    });
+
+    localStorage.setItem('orderItems', JSON.stringify(existing));
+    window.location.href = 'order-summary.html';
+  } else {
+    alert("Please select at least one item before proceeding.");
+  }
+});
+
 </script>
 
 </body>

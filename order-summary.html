@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
+  <title>Order Summary</title>
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: white;
+    }
+
+    .container {
+      position: relative;
+      max-width: 400px;
+      margin: auto;
+      background-color: #fff3e0;
+      border-radius: 12px;
+      padding: 20px;
+      padding-top: 50px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    .back-button {
+      position: absolute;
+      top: 15px;
+      left: 15px;
+      color: black;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 30px;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .order-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid #ddd;
+    }
+
+    .order-item:last-child {
+      border-bottom: none;
+    }
+
+    .item-info {
+      flex: 1;
+    }
+
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .controls button {
+      border: none;
+      padding: 5px 10px;
+      cursor: pointer;
+      border-radius: 5px;
+      font-weight: bold;
+    }
+
+    .increase {
+      background-color: green;
+      color: white;
+    }
+
+    .decrease {
+      background-color: red;
+      color: white;
+    }
+
+    .subtotal {
+      width: 80px;
+      text-align: right;
+    }
+
+    .total {
+      font-weight: bold;
+      font-size: 18px;
+      text-align: right;
+      margin-top: 20px;
+    }
+
+    .button-group {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 30px;
+      gap: 10px;
+    }
+
+    .button-group button {
+      flex: 1;
+      padding: 10px;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .clear-button {
+      background-color: #FAD59A;
+      color: black;
+    }
+
+    .checkout-button {
+      background-color: #4CAF50;
+      color: white;
+    }
+
+    .checkout-button:hover {
+      background-color: #45a049;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <a href="index.html" class="back-button" title="Go back">←</a>
+
+  <h1>Order Summary</h1>
+  <div id="order-list"></div>
+  <div class="total" id="total">Total: ₱0</div>
+
+  <div class="button-group">
+    <button class="clear-button" onclick="clearOrder()">Clear Order</button>
+    <button class="checkout-button" onclick="proceedToCheckout()">Proceed to Checkout</button>
+  </div>
+</div>
+
+<script>
+  function loadOrderSummary() {
+    const orderList = document.getElementById('order-list');
+    const totalEl = document.getElementById('total');
+    const storedItems = JSON.parse(localStorage.getItem('orderItems')) || [];
+
+    orderList.innerHTML = '';
+    let total = 0;
+
+    storedItems.forEach((item, index) => {
+      const subtotal = item.qty * item.price;
+      total += subtotal;
+
+      const itemDiv = document.createElement('div');
+      itemDiv.className = 'order-item';
+
+      itemDiv.innerHTML = `
+        <div class="item-info">${item.name} x<span class="qty">${item.qty}</span></div>
+        <div class="controls">
+          <button class="decrease">-</button>
+          <button class="increase">+</button>
+        </div>
+        <div class="subtotal">₱<span class="subtotal-val">${subtotal}</span></div>
+      `;
+
+      const increaseBtn = itemDiv.querySelector('.increase');
+      const decreaseBtn = itemDiv.querySelector('.decrease');
+
+      increaseBtn.addEventListener('click', () => {
+        item.qty++;
+        updateAndSave();
+      });
+
+      decreaseBtn.addEventListener('click', () => {
+        if (item.qty > 1) {
+          item.qty--;
+        } else {
+          storedItems.splice(index, 1);
+        }
+        updateAndSave();
+      });
+
+      orderList.appendChild(itemDiv);
+    });
+
+    totalEl.textContent = `Total: ₱${total}`;
+    localStorage.setItem('orderItems', JSON.stringify(storedItems));
+
+    function updateAndSave() {
+      localStorage.setItem('orderItems', JSON.stringify(storedItems));
+      loadOrderSummary();
+    }
+  }
+
+  function clearOrder() {
+    if (confirm("Are you sure you want to clear your order?")) {
+      localStorage.removeItem('orderItems');
+      loadOrderSummary();
+    }
+  }
+
+  function proceedToCheckout() {
+    const items = JSON.parse(localStorage.getItem('orderItems')) || [];
+    if (items.length === 0) {
+      alert("Your order is empty.");
+      return;
+    }
+
+    window.location.href = "checkout.html";
+  }
+
+  window.onload = loadOrderSummary;
+</script>
+
+</body>
+</html>
