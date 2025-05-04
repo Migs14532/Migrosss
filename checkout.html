@@ -29,7 +29,7 @@
 
     .order-summary {
       max-height: 300px;
-      overflow-y: auto;
+      overflow-y: scroll;
       padding-right: 10px;
       margin-bottom: 20px;
     }
@@ -183,7 +183,7 @@
       return;
     }
 
-    let summaryMessage = "Order Summary:\n\n";
+    let summaryMessage = "Receipt:\n\n";
     let total = 0;
 
     items.forEach(item => {
@@ -192,7 +192,7 @@
       summaryMessage += `• ${item.name} x${item.qty} - ₱${subtotal}\n`;
     });
 
-    summaryMessage += `\nTotal: ₱${total}\nPayment Method: ${paymentMethod}\n\n✅ Order placed successfully!`;
+    summaryMessage += `\nTotal: ₱${total}\nPayment Method: ${paymentMethod}\n Order placed successfully!`;
     alert(summaryMessage);
 
     localStorage.setItem('paymentMethod', paymentMethod);
